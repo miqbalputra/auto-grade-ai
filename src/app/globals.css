@@ -339,6 +339,109 @@ th {
   font-weight: 700;
 }
 
+.chat-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 16px;
+  align-items: start;
+}
+
+.chat-panel {
+  display: grid;
+  gap: 14px;
+  min-height: 620px;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 14px;
+}
+
+.chat-header p {
+  margin: 4px 0 0;
+}
+
+.chat-messages {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  max-height: 470px;
+  min-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.chat-message {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.chat-message.user {
+  grid-template-columns: minmax(0, 1fr) 32px;
+}
+
+.chat-message.user .chat-avatar {
+  grid-column: 2;
+  grid-row: 1;
+  background: #eef5f0;
+  color: var(--green);
+}
+
+.chat-message.user .chat-bubble {
+  grid-column: 1;
+  justify-self: end;
+  background: var(--green);
+  color: #fff;
+}
+
+.chat-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fef0c7;
+  color: var(--gold);
+}
+
+.chat-bubble {
+  width: fit-content;
+  max-width: min(680px, 100%);
+  border-radius: 8px;
+  padding: 11px 13px;
+  background: #f6f8f7;
+  border: 1px solid var(--line);
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.chat-input {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.chat-suggestions {
+  display: grid;
+  gap: 10px;
+}
+
+.chat-suggestions .button {
+  justify-content: flex-start;
+  text-align: left;
+  height: auto;
+  white-space: normal;
+  line-height: 1.35;
+}
+
 @page {
   size: 215.9mm 330.2mm;
   margin: 0;
@@ -374,6 +477,14 @@ th {
   }
 
   .grid.cols-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-input {
     grid-template-columns: 1fr;
   }
 }

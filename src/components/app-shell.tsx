@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { BarChart3, FileSearch, GraduationCap, LogOut, Printer, Settings, Users } from "lucide-react";
+import { BarChart3, BotMessageSquare, FileSearch, GraduationCap, LogOut, Printer, Settings, Users } from "lucide-react";
 import { logoutAction } from "@/lib/server-actions";
 
 const nav = [
   { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
   { href: "/scanner", label: "Scanner Rapor", icon: FileSearch },
   { href: "/students", label: "Data Siswa", icon: Users },
+  { href: "/chat", label: "Chatbot Data", icon: BotMessageSquare },
   { href: "/print", label: "Cetak Ijazah", icon: Printer },
   { href: "/settings", label: "Settings LLM", icon: Settings }
 ];

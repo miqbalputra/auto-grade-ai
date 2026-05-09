@@ -25,6 +25,11 @@ type LlmConfig = {
   model: string;
 };
 
+type ChatMessage = {
+  role: "system" | "user" | "assistant";
+  content: string;
+};
+
 export async function fetchModels(config: Pick<LlmConfig, "baseUrl" | "apiKey">) {
   const response = await fetch(`${config.baseUrl.replace(/\/$/, "")}/v1/models`, {
     headers: { Authorization: `Bearer ${config.apiKey}` },
@@ -77,4 +82,30 @@ export async function extractReportFromImage(config: LlmConfig, mimeType: string
     throw new Error("JSON LLM tidak sesuai schema.");
   }
   return parsed.data;
+}
+
+export async function completeChat(config: LlmConfig, messages: ChatMessage[]) {
+  const response = await fetch(`${config.baseUrl.replace(/\/$/, "")}/v1/chat/completions`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${config.apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: config.model,
+      messages,
+      temperature: 0.2
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`LLM gagal ${response.status}: ${await response.text()}`);
+  }
+
+  const data = await response.json();
+  const content = data.choices?.[0]?.message?.content;
+  if (!content || typeof content !== "string") {
+    throw new Error("LLM tidak mengembalikan jawaban teks.");
+  }
+  return content;
 }
