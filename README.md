@@ -33,6 +33,14 @@ npm run dev
 
 4. Buka `http://localhost:3000/login`.
 
+## Deploy ke VPS
+
+Panduan production via Coolify, MariaDB, storage upload, migration, seed admin, domain, HTTPS, dan backup tersedia di:
+
+```text
+DEPLOYMENT.md
+```
+
 ## Catatan Build Awal
 
 PDF upload sudah disimpan, tetapi rendering halaman pertama PDF ke PNG 150 DPI belum diaktifkan. Untuk uji alur AI saat ini gunakan JPG/PNG rapor atau lanjutkan dengan form manual pada iterasi berikutnya.
