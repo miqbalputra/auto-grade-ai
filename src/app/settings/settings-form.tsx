@@ -16,6 +16,7 @@ export function SettingsForm({ initial }: Props) {
   const [apiKey, setApiKey] = useState(initial.apiKey);
   const [model, setModel] = useState(initial.model);
   const [models, setModels] = useState<string[]>(initial.model ? [initial.model] : []);
+  const [manualModel, setManualModel] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,12 +36,14 @@ export function SettingsForm({ initial }: Props) {
 
     if (!response.ok) {
       setError(payload.message ?? "Koneksi gagal.");
+      setManualModel(true);
       return;
     }
 
     setModels(payload.models);
     setModel(payload.models[0] ?? "");
-    setMessage(`Koneksi berhasil. ${payload.models.length} model ditemukan.`);
+    setManualModel(payload.models.length === 0);
+    setMessage(payload.models.length ? `Koneksi berhasil. ${payload.models.length} model ditemukan.` : "Koneksi berhasil, tetapi provider tidak mengirim daftar model. Isi model secara manual.");
   }
 
   async function save(event: React.FormEvent<HTMLFormElement>) {
@@ -85,14 +88,21 @@ export function SettingsForm({ initial }: Props) {
       </div>
       <div className="field">
         <label>Model Vision</label>
-        <select className="select" value={model} onChange={(event) => setModel(event.target.value)}>
-          <option value="">Pilih model</option>
-          {models.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
+        {manualModel ? (
+          <input className="input" value={model} onChange={(event) => setModel(event.target.value)} placeholder="Contoh: seed-1-6-250915 atau model ID provider" />
+        ) : (
+          <select className="select" value={model} onChange={(event) => setModel(event.target.value)}>
+            <option value="">Pilih model</option>
+            {models.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        )}
+        <button className="button secondary" type="button" onClick={() => setManualModel((value) => !value)}>
+          {manualModel ? "Pilih dari daftar model" : "Isi model manual"}
+        </button>
       </div>
       <button className="button primary" disabled={loading || !baseUrl || !apiKey || !model} type="submit">
         <Save size={18} />

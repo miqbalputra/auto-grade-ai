@@ -30,18 +30,39 @@ type ChatMessage = {
   content: string;
 };
 
-export async function fetchModels(config: Pick<LlmConfig, "baseUrl" | "apiKey">) {
-  const response = await fetch(`${config.baseUrl.replace(/\/$/, "")}/v1/models`, {
-    headers: { Authorization: `Bearer ${config.apiKey}` },
-    cache: "no-store"
-  });
+function normalizeBaseUrl(baseUrl: string) {
+  return baseUrl.replace(/\/+$/, "");
+}
 
-  if (!response.ok) {
-    throw new Error(`Provider membalas ${response.status}: ${await response.text()}`);
+function endpointUrl(baseUrl: string, endpoint: "models" | "chat/completions") {
+  const normalized = normalizeBaseUrl(baseUrl);
+  const path = new URL(normalized).pathname.replace(/\/+$/, "");
+  const alreadyVersioned = /\/(v\d+|api\/coding\/v\d+|api\/v\d+)$/i.test(path);
+  return `${normalized}${alreadyVersioned ? "" : "/v1"}/${endpoint}`;
+}
+
+export async function fetchModels(config: Pick<LlmConfig, "baseUrl" | "apiKey">) {
+  const candidates = Array.from(
+    new Set([endpointUrl(config.baseUrl, "models"), `${normalizeBaseUrl(config.baseUrl)}/models`])
+  );
+
+  let lastError = "";
+  for (const url of candidates) {
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${config.apiKey}` },
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      lastError = `Provider membalas ${response.status}: ${await response.text()}`;
+      continue;
+    }
+
+    const payload = (await response.json()) as { data?: Array<{ id: string }> };
+    return (payload.data ?? []).map((model) => model.id).filter(Boolean);
   }
 
-  const payload = (await response.json()) as { data?: Array<{ id: string }> };
-  return (payload.data ?? []).map((model) => model.id).filter(Boolean);
+  throw new Error(lastError || "Provider tidak mengembalikan daftar model.");
 }
 
 export async function extractReportFromImage(config: LlmConfig, mimeType: string, base64: string) {
@@ -62,7 +83,7 @@ export async function extractReportFromImage(config: LlmConfig, mimeType: string
     temperature: 0
   };
 
-  const response = await fetch(`${config.baseUrl.replace(/\/$/, "")}/v1/chat/completions`, {
+  const response = await fetch(endpointUrl(config.baseUrl, "chat/completions"), {
     method: "POST",
     headers: {
       Authorization: `Bearer ${config.apiKey}`,
@@ -85,7 +106,7 @@ export async function extractReportFromImage(config: LlmConfig, mimeType: string
 }
 
 export async function completeChat(config: LlmConfig, messages: ChatMessage[]) {
-  const response = await fetch(`${config.baseUrl.replace(/\/$/, "")}/v1/chat/completions`, {
+  const response = await fetch(endpointUrl(config.baseUrl, "chat/completions"), {
     method: "POST",
     headers: {
       Authorization: `Bearer ${config.apiKey}`,
