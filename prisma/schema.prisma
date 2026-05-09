@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           Int       @id @default(autoincrement())
+  username     String    @unique @db.VarChar(50)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  lastLogin    DateTime? @map("last_login")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@map("admin_users")
+}
+
+model AppSettings {
+  id         Int      @id
+  llmBaseUrl String?  @map("llm_base_url") @db.VarChar(255)
+  llmApiKey  String?  @map("llm_api_key") @db.VarChar(500)
+  llmModel   String?  @map("llm_model") @db.VarChar(100)
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
+}
+
+model Student {
+  id          Int          @id @default(autoincrement())
+  latestNis   String?      @map("latest_nis") @db.VarChar(20)
+  name        String       @db.VarChar(100)
+  gender      Gender?
+  finalScore  Decimal?     @map("final_score") @db.Decimal(5, 2)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  reportCards ReportCard[]
+
+  @@index([name])
+  @@index([latestNis])
+  @@map("students")
+}
+
+model ReportCard {
+  id             Int              @id @default(autoincrement())
+  studentId      Int              @map("student_id")
+  student        Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  nisOnDocument  String?          @map("nis_on_document") @db.VarChar(20)
+  className      String?          @map("class_name") @db.VarChar(50)
+  semester       Int
+  academicYear   String           @map("academic_year") @db.VarChar(10)
+  totalScore     Decimal          @map("total_score") @db.Decimal(7, 2)
+  scoreCount     Int              @map("score_count")
+  averageScore   Decimal          @map("average_score") @db.Decimal(5, 2)
+  scoreBreakdown Json             @map("score_breakdown")
+  fileUrl        String?          @map("file_url") @db.VarChar(255)
+  status         ReportCardStatus @default(ok)
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  @@unique([studentId, semester, academicYear])
+  @@index([semester, academicYear])
+  @@map("report_cards")
+}
+
+enum Gender {
+  L
+  P
+}
+
+enum ReportCardStatus {
+  ok
+  needs_review
+  failed
+}

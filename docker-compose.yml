@@ -1,0 +1,16 @@
+services:
+  mariadb:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: autograde_ai
+      MARIADB_USER: autograde
+      MARIADB_PASSWORD: autograde
+      MARIADB_ROOT_PASSWORD: autograde_root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+volumes:
+  mariadb_data:
